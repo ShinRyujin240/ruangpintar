@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ruangpintar
+    runtime: node
+    plan: free
+    buildCommand: echo "no build needed"
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TEACHER_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash

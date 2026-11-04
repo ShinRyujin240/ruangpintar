@@ -1,0 +1,13 @@
+{
+  "name": "ruangpintar",
+  "version": "2.0.0",
+  "description": "RuangPintar — e-learning interaktif SMA (IPA/IPS) dengan AI Tutor dan forum tanya anonim",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

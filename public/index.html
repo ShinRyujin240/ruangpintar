@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuangPintar — E-Learning Interaktif SMA (IPA & IPS)</title>
+    <meta name="description" content="Belajar SMA jadi seru: materi interaktif IPA & IPS, kuis kilat, AI Tutor, dan forum tanya anonim.">
+    <meta name="theme-color" content="#6C5CE7">
+    <meta property="og:title" content="RuangPintar — E-Learning Interaktif SMA">
+    <meta property="og:description" content="Materi interaktif IPA & IPS, kuis kilat, AI Tutor, dan forum tanya anonim.">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+
+    <!-- ===== TOP BAR ===== -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <span class="logo-icon">📚</span>
+            <h1 class="app-title">Ruang<span class="highlight">Pintar</span></h1>
+        </div>
+        <div class="topbar-right">
+            <button id="btn-track" class="track-pill" onclick="App.showOnboarding()" title="Ganti jurusan">🎓 <span id="track-text">IPA</span></button>
+            <div class="level-pill" title="Level & XP"><span id="level-text">Lv 1 · 0/100</span><div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div></div>
+            <div class="streak-badge" id="streak-badge" title="Streak kamu">
+                <span>🔥</span>
+                <span id="streak-count">0</span>
+            </div>
+            <button id="btn-theme" class="btn-icon" title="Ganti Tema">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+        <section id="page-beranda" class="page active"></section>
+        <section id="page-materi" class="page"></section>
+        <section id="page-kuis" class="page"></section>
+        <section id="page-tanya" class="page"></section>
+        <section id="page-ai" class="page"></section>
+        <section id="page-profil" class="page"></section>
+    </main>
+
+    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-page="beranda">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Beranda</span>
+        </button>
+        <button class="nav-item" data-page="materi">
+            <span class="nav-icon">📖</span>
+            <span class="nav-label">Materi</span>
+        </button>
+        <button class="nav-item" data-page="kuis">
+            <span class="nav-icon">🧠</span>
+            <span class="nav-label">Kuis</span>
+        </button>
+        <button class="nav-item" data-page="tanya">
+            <span class="nav-icon">💬</span>
+            <span class="nav-label">Tanya</span>
+        </button>
+        <button class="nav-item" data-page="ai">
+            <span class="nav-icon">🤖</span>
+            <span class="nav-label">AI Tutor</span>
+        </button>
+        <button class="nav-item" data-page="profil">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Profil</span>
+        </button>
+    </nav>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ===== MODAL ===== -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-content" class="modal-content"></div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="js/app.js"></script>
+    <script src="js/materi.js"></script>
+    <script src="js/materi2.js"></script>
+    <script src="js/soal.js"></script>
+    <script src="js/soal2.js"></script>
+    <script src="js/kuis.js"></script>
+    <script src="js/tanya.js"></script>
+    <script src="js/ai.js"></script>
+
+</body>
+</html>
