@@ -342,7 +342,7 @@ const Materi = (() => {
             // Mode per mata pelajaran: tampilkan banner dan materi mata pelajaran terpilih
             const filtered = allVisible.filter(l => l.subject === currentSubjectFilter);
             const icon = SUBJECT_ICONS[currentSubjectFilter] || '📘';
-            const completedCount = filtered.filter(l => state.completedLessons.includes(l.id)).length;
+            const completedCount = filtered.filter(l => (state.completedLessons || []).includes(l.id)).length;
 
             contentHtml = `
                 <div class="subject-banner">
@@ -361,10 +361,11 @@ const Materi = (() => {
             `;
         } else {
             // Mode semua mata pelajaran: dikelompokkan secara terstruktur per mata pelajaran
+            const completedLessons = state.completedLessons || [];
             contentHtml = presentSubjects.map(subj => {
                 const subjectLessons = allVisible.filter(l => l.subject === subj);
                 const icon = SUBJECT_ICONS[subj] || '📘';
-                const completedInSubj = subjectLessons.filter(l => state.completedLessons.includes(l.id)).length;
+                const completedInSubj = subjectLessons.filter(l => completedLessons.includes(l.id)).length;
                 return `
                     <div class="subject-group-section">
                         <div class="subject-section-header">
@@ -385,8 +386,14 @@ const Materi = (() => {
         }
 
         page.innerHTML = `
-            <h2 class="section-title" style="margin-top:0;">📖 Materi Interaktif SMA — ${track}</h2>
-            <p class="section-subtitle">Materi sudah dikelompokkan per mata pelajaran. Klik menu mata pelajaran di bawah untuk memilih!</p>
+            <!-- Switcher Modul Interaktif & Rangkuman Kilat -->
+            <div class="materi-mode-tabs">
+                <button class="materi-mode-tab active" onclick="Materi.renderList()">📖 Modul Interaktif</button>
+                <button class="materi-mode-tab" onclick="App.navigate('rangkuman')">⚡ Rangkuman & Cheat Sheet</button>
+            </div>
+
+            <h2 class="section-title" style="margin-top:0;">📖 Modul Pembelajaran SMA — ${track}</h2>
+            <p class="section-subtitle">Materi interaktif lengkap dengan simulasi slider, grafik dinamis & visualisasi organ.</p>
 
             <!-- Menu Filter Tab Mata Pelajaran -->
             <div class="subject-filter-nav">

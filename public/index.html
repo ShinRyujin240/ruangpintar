@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,8 +27,9 @@
                 <span>🔥</span>
                 <span id="streak-count">0</span>
             </div>
-            <button id="btn-theme" class="btn-icon" title="Ganti Tema">
+            <button id="btn-theme" class="theme-pill" title="Ganti Mode Gelap / Terang">
                 <span id="theme-icon">🌙</span>
+                <span id="theme-text" class="theme-text">Gelap</span>
             </button>
         </div>
     </header>
@@ -37,6 +38,7 @@
     <main class="main-content">
         <section id="page-beranda" class="page active"></section>
         <section id="page-materi" class="page"></section>
+        <section id="page-rangkuman" class="page"></section>
         <section id="page-kuis" class="page"></section>
         <section id="page-tanya" class="page"></section>
         <section id="page-ai" class="page"></section>
@@ -83,6 +85,7 @@
     <script src="js/app.js"></script>
     <script src="js/materi.js"></script>
     <script src="js/materi2.js"></script>
+    <script src="js/rangkuman.js"></script>
     <script src="js/soal.js"></script>
     <script src="js/soal2.js"></script>
     <script src="js/kuis.js"></script>

@@ -8,7 +8,7 @@ const App = (() => {
     const STORAGE_KEY = 'ruangpintar_v2';
 
     const DEFAULT_STATE = {
-        theme: 'light',
+        theme: 'dark',
         studentName: 'Siswa Pintar',
         completedLessons: [],
         lessonProgress: {},
@@ -58,18 +58,31 @@ const App = (() => {
     // -------- THEME --------
     function initTheme() {
         const html = document.documentElement;
+        if (!state.theme) state.theme = 'dark';
         html.setAttribute('data-theme', state.theme);
         updateThemeIcon();
-        document.getElementById('btn-theme').addEventListener('click', () => {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            html.setAttribute('data-theme', state.theme);
-            updateThemeIcon();
-            saveState();
-        });
+        const btnTheme = document.getElementById('btn-theme');
+        if (btnTheme) {
+            btnTheme.addEventListener('click', () => {
+                state.theme = state.theme === 'light' ? 'dark' : 'light';
+                html.setAttribute('data-theme', state.theme);
+                updateThemeIcon();
+                saveState();
+                showToast(state.theme === 'dark' ? '🌙 Mode Malam diaktifkan' : '☀️ Mode Siang diaktifkan');
+            });
+        }
     }
 
     function updateThemeIcon() {
-        document.getElementById('theme-icon').textContent = state.theme === 'light' ? '🌙' : '☀️';
+        const isDark = state.theme === 'dark';
+        const icon = document.getElementById('theme-icon');
+        const text = document.getElementById('theme-text');
+        if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        if (text) text.textContent = isDark ? 'Gelap' : 'Terang';
+
+        // Update mobile status bar theme-color
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0A0E17' : '#6C5CE7');
     }
 
     // -------- ROUTER --------
@@ -99,6 +112,7 @@ const App = (() => {
         if (page === 'beranda') renderBeranda();
         if (page === 'profil') renderProfil();
         if (page === 'materi' && typeof Materi !== 'undefined') Materi.renderList();
+        if (page === 'rangkuman' && typeof Rangkuman !== 'undefined') Rangkuman.render();
         if (page === 'kuis' && typeof Kuis !== 'undefined') Kuis.renderModeSelector();
         if (page === 'tanya' && typeof Tanya !== 'undefined') Tanya.render();
         if (page === 'ai' && typeof AITutor !== 'undefined') AITutor.render();
@@ -215,6 +229,9 @@ const App = (() => {
                 <div class="feature-card purple card-clickable" onclick="App.navigate('materi')">
                     <span class="fc-icon">📖</span><span class="fc-title">Materi Interaktif</span>
                 </div>
+                <div class="feature-card cyan card-clickable" onclick="App.navigate('rangkuman')">
+                    <span class="fc-icon">⚡</span><span class="fc-title">Rangkuman Kilat</span>
+                </div>
                 <div class="feature-card green card-clickable" onclick="App.navigate('kuis')">
                     <span class="fc-icon">🧠</span><span class="fc-title">Kuis Pemanasan</span>
                 </div>
@@ -227,19 +244,23 @@ const App = (() => {
             </div>
 
             <h3 class="section-title">📊 Mengapa Aplikasi Ini Dibuat?</h3>
-            <p class="section-subtitle">Berdasarkan survei 47 siswa — 3 masalah terbesar yang kami pecahkan:</p>
+            <p class="section-subtitle">Berdasarkan survei 47 siswa SMA — solusi bertahap yang kami hadirkan:</p>
             <div class="survey-bars card">
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🎨 Butuh Media Visual & Interaktif</span><span class="sl-score">4.40 / 5.00</span></div>
-                    <div class="survey-bar-bg"><div class="survey-bar-fill" data-width="88" style="width:0%"></div></div>
+                    <div class="survey-label"><span class="sl-name">🎨 Butuh Media Visual & Interaktif (Rank 1)</span><span class="sl-score">4.53 / 5.00</span></div>
+                    <div class="survey-bar-bg"><div class="survey-bar-fill" data-width="91" style="width:0%"></div></div>
                 </div>
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🧩 Butuh Kuis Pemanasan Awal Kelas</span><span class="sl-score">3.96 / 5.00</span></div>
-                    <div class="survey-bar-bg"><div class="survey-bar-fill green" data-width="79" style="width:0%"></div></div>
+                    <div class="survey-label"><span class="sl-name">🧩 Butuh Kuis Pemanasan Awal Kelas (Rank 2)</span><span class="sl-score">4.21 / 5.00</span></div>
+                    <div class="survey-bar-bg"><div class="survey-bar-fill green" data-width="84" style="width:0%"></div></div>
                 </div>
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🤐 Malu Bertanya & Pura-Pura Paham</span><span class="sl-score">3.36 / 5.00</span></div>
-                    <div class="survey-bar-bg"><div class="survey-bar-fill warm" data-width="67" style="width:0%"></div></div>
+                    <div class="survey-label"><span class="sl-name">🤐 Malu Bertanya di Kelas / Takut Salah (Rank 3)</span><span class="sl-score">3.43 / 5.00</span></div>
+                    <div class="survey-bar-bg"><div class="survey-bar-fill warm" data-width="69" style="width:0%"></div></div>
+                </div>
+                <div class="survey-item">
+                    <div class="survey-label"><span class="sl-name">⚡ Lupa Materi & Butuh Rangkuman Cepat (Rank 4)</span><span class="sl-score">3.26 / 5.00</span></div>
+                    <div class="survey-bar-bg"><div class="survey-bar-fill cyan" data-width="65" style="width:0%"></div></div>
                 </div>
             </div>
 

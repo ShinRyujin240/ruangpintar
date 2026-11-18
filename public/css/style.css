@@ -51,21 +51,51 @@
     --gradient-hero: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%);
 }
 
-/* Dark Theme */
+/* ---------- Clean Midnight Modern Dark Theme ---------- */
 [data-theme="dark"] {
-    --bg-primary: #0F0F1A;
-    --bg-secondary: #1A1A2E;
-    --bg-card: #1E1E35;
-    --bg-input: #2A2A45;
+    --primary: #8B5CF6;
+    --primary-light: #A78BFA;
+    --primary-dark: #7C3AED;
+    --secondary: #10B981;
+    --secondary-light: #34D399;
+    --accent: #F59E0B;
+    --accent-dark: #D97706;
 
-    --text-primary: #E8E8F0;
-    --text-secondary: #A0A0B8;
-    --text-muted: #5A5A78;
+    --bg-primary: #0A0E17;
+    --bg-secondary: #111827;
+    --bg-card: rgba(19, 27, 44, 0.85);
+    --bg-card-solid: #151F33;
+    --bg-input: #1C273E;
 
-    --border: #2A2A45;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --text-on-primary: #FFFFFF;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(139, 92, 246, 0.4);
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.4);
+    --shadow-md: 0 8px 24px -4px rgba(0,0,0,0.55);
+    --shadow-lg: 0 16px 48px -8px rgba(0,0,0,0.7);
+    --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .bottom-nav {
+    background: rgba(10, 14, 23, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .lesson-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .cheat-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 /* ---------- Reset & Base ---------- */
@@ -1884,4 +1914,471 @@ body::after  { background: #00B894; bottom: -120px; right: -100px; animation-del
     font-size: 13px;
     color: var(--text-secondary);
     margin: 0;
+}
+
+
+/* ============================================================
+   TAHAP 1: THEME TOGGLE, MODE TABS & RANGKUMAN KILAT
+   ============================================================ */
+
+/* Theme Toggle Button */
+.theme-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+}
+.theme-pill:hover {
+    transform: translateY(-1px);
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+.theme-pill:active {
+    transform: scale(0.96);
+}
+
+/* Feature card cyan & Survey bar cyan */
+.feature-card.cyan {
+    border-color: #06B6D4;
+}
+.feature-card.cyan:hover {
+    border-color: #22D3EE;
+    box-shadow: 0 4px 18px rgba(6, 182, 212, 0.28);
+}
+.survey-bar-fill.cyan {
+    background: linear-gradient(90deg, #06B6D4, #3B82F6);
+}
+
+/* Sub-header Mode Tabs (Modul Interaktif vs Rangkuman Kilat) */
+.materi-mode-tabs {
+    display: flex;
+    background: var(--bg-input);
+    padding: 5px;
+    border-radius: var(--radius-lg);
+    gap: 6px;
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+}
+.materi-mode-tab {
+    flex: 1;
+    text-align: center;
+    padding: 11px 16px;
+    border-radius: var(--radius-md);
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border: none;
+}
+.materi-mode-tab.active {
+    background: var(--bg-card-solid, var(--bg-secondary));
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+.materi-mode-tab:hover:not(.active) {
+    color: var(--text-primary);
+}
+
+/* Rangkuman Kilat Hero Banner */
+.rangkuman-view {
+    animation: fadeSlideUp 0.35s ease;
+}
+.rangkuman-hero {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    backdrop-filter: blur(10px);
+}
+.rangkuman-hero .rh-left {
+    flex: 1;
+    min-width: 250px;
+}
+.rangkuman-hero .rh-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #06B6D4;
+    background: rgba(6, 182, 212, 0.12);
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    margin-bottom: 8px;
+}
+.rangkuman-hero .rh-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+}
+.rangkuman-hero .rh-desc {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+.rh-print-btn {
+    white-space: nowrap;
+    padding: 8px 16px;
+    font-weight: 700;
+}
+
+/* Tracker Hafalan Rumus */
+.hafal-tracker-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+}
+.htc-info {
+    flex: 1;
+    min-width: 200px;
+}
+.htc-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.htc-score {
+    font-size: 13px;
+    color: var(--secondary);
+    font-weight: 800;
+}
+.htc-badge {
+    font-size: 13px;
+    font-weight: 800;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--secondary);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    white-space: nowrap;
+}
+
+/* Controls (Search & Filter Pills) */
+.rangkuman-controls {
+    margin-bottom: 22px;
+}
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+.search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 16px;
+    pointer-events: none;
+    opacity: 0.6;
+}
+.search-box input {
+    width: 100%;
+    padding: 12px 40px 12px 42px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.25s ease;
+}
+.search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+.clear-search-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+}
+.clear-search-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Bento Grid Rangkuman */
+.rangkuman-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+}
+
+/* Kartu Rumus (Cheat Card) */
+.cheat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.cheat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
+}
+.cheat-card.memorized {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 100%);
+}
+.cheat-card.memorized::after {
+    content: "✓ DIHAFAL";
+    position: absolute;
+    top: 12px;
+    right: -28px;
+    transform: rotate(45deg);
+    background: #10B981;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    padding: 3px 26px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.cc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.cc-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.badge-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+.cc-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hafal-btn {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.hafal-btn:hover {
+    border-color: #F59E0B;
+    color: #F59E0B;
+}
+.hafal-btn.active {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #F59E0B;
+    color: #F59E0B;
+}
+.copy-btn {
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.copy-btn:hover {
+    transform: scale(1.1);
+    background: rgba(139, 92, 246, 0.2);
+    border-color: var(--primary);
+}
+
+.cc-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.35;
+}
+
+/* Formula Box (Dark Terminal / Sleek Formula Block) */
+.formula-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    position: relative;
+}
+.fb-tag {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-light);
+    margin-bottom: 6px;
+}
+.fb-content {
+    margin: 0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #38BDF8;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+[data-theme="light"] .fb-content {
+    color: #0369A1;
+}
+
+/* Mnemonic / Jembatan Keledai */
+.mnemonic-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px dashed rgba(245, 158, 11, 0.35);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+}
+.mb-icon {
+    font-size: 16px;
+    line-height: 1.2;
+}
+.mb-text {
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.45;
+}
+
+/* Key Points */
+.keys-list {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+.kl-label {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+.keys-list ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.5;
+}
+.keys-list li {
+    margin-bottom: 4px;
+}
+
+/* Example Box */
+.example-box {
+    font-size: 12px;
+    background: var(--bg-input);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+.eb-badge {
+    font-weight: 800;
+    color: var(--secondary);
+    margin-right: 4px;
+}
+
+/* Mini Ask AI */
+.cc-footer {
+    margin-top: auto;
+    padding-top: 6px;
+}
+.btn-ask-ai-mini {
+    width: 100%;
+    text-align: center;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-ask-ai-mini:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(139, 92, 246, 0.08);
+}
+
+/* Print Friendly Styles */
+@media print {
+    .topbar, .bottom-nav, .rangkuman-controls, .rh-actions, .cc-actions, .btn-ask-ai-mini, .materi-mode-tabs {
+        display: none !important;
+    }
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .cheat-card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 16px;
+    }
+    .formula-box {
+        border-left: 4px solid #333 !important;
+        background: #f4f4f4 !important;
+    }
+    .fb-content {
+        color: #000 !important;
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+    .rangkuman-grid {
+        grid-template-columns: 1fr;
+    }
+    .theme-pill .theme-text {
+        display: none;
+    }
+    .theme-pill {
+        padding: 6px 8px;
+    }
 }
