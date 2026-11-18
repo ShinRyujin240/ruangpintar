@@ -1782,3 +1782,106 @@ body::after  { background: #00B894; bottom: -120px; right: -100px; animation-del
 .track-card.ips:hover, .track-card.ips.selected { border-color: #E17055; background: rgba(225,112,85,.1); }
 .track-card.selected { box-shadow: 0 0 0 4px rgba(108,92,231,.15); }
 @media (max-width: 420px) { .track-pill span#track-text { display: none; } .level-pill { min-width: 70px; } }
+
+/* ============================================================
+   V4 — Pengelompokan & Menu Mata Pelajaran (Materi)
+   ============================================================ */
+.subject-filter-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 14px 2px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.subject-filter-nav::-webkit-scrollbar { display: none; }
+.subject-filter-nav .chip {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.subject-group-section {
+    margin-bottom: 26px;
+    animation: fadeSlideUp .35s ease;
+}
+.subject-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 10px 4px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+.ssh-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.ssh-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+.ssh-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+.ssh-link-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: all .2s ease;
+    white-space: nowrap;
+}
+.ssh-link-btn:hover {
+    background: rgba(108, 92, 231, 0.1);
+    transform: translateX(2px);
+}
+.subject-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    animation: fadeSlideUp .3s ease;
+}
+.subject-banner .sb-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.subject-banner .sb-icon {
+    font-size: 34px;
+    line-height: 1;
+}
+.subject-banner .sb-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 2px 0;
+}
+.subject-banner .sb-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}

@@ -263,6 +263,19 @@ const Materi = (() => {
 
     let currentLessonId = null;
     let currentStepIndex = 0;
+    let currentSubjectFilter = 'Semua';
+
+    const SUBJECT_ORDER = ['Fisika', 'Matematika', 'Kimia', 'Biologi', 'Ekonomi', 'Sosiologi', 'Geografi', 'Sejarah'];
+    const SUBJECT_ICONS = {
+        Fisika: '🚀',
+        Matematika: '📈',
+        Kimia: '⚛️',
+        Biologi: '🧫',
+        Ekonomi: '💹',
+        Sosiologi: '🤝',
+        Geografi: '🌋',
+        Sejarah: '🇮🇩'
+    };
 
     const TRACKS = { newton: ['ipa'], kuadrat: ['ipa', 'ips'], atom: ['ipa'], sel: ['ipa'] };
     const tracksOf = l => l.tracks || TRACKS[l.id] || ['ipa', 'ips'];
@@ -277,36 +290,122 @@ const Materi = (() => {
     }
     function register(list) { list.forEach(l => { if (!LESSONS.some(x => x.id === l.id)) LESSONS.push(l); }); }
 
+    function setSubjectFilter(subj) {
+        currentSubjectFilter = subj;
+        renderList();
+        const page = document.getElementById('page-materi');
+        if (page && typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function renderLessonCard(l, state) {
+        const done = state.completedLessons.includes(l.id);
+        const prog = state.lessonProgress[l.id] || 0;
+        const pct = done ? 100 : Math.round((prog / l.steps.length) * 100);
+        return `
+        <div class="lesson-card card-clickable" style="--lc:${l.color}" onclick="Materi.openLesson('${l.id}')">
+            <div class="lc-icon" style="background:${l.color}22">${l.icon}</div>
+            <div class="lc-info">
+                <div class="lc-title">${l.title}</div>
+                <div class="lc-desc">${l.desc}</div>
+                <div class="lc-meta">
+                    <span class="badge badge-primary lc-badge">${l.subject}</span>
+                    <span class="badge badge-warning lc-badge">${l.grade}</span>
+                    <span class="badge badge-success lc-badge">⏱️ ${l.duration}</span>
+                    ${done ? '<span class="badge badge-success lc-badge">✅ Selesai</span>' : ''}
+                </div>
+                ${!done && prog > 0 ? `<div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+            </div>
+            <span class="lc-arrow">→</span>
+        </div>`;
+    }
+
     // ---------- LIST ----------
     function renderList() {
         const page = document.getElementById('page-materi');
         const state = App.getState();
-        page.innerHTML = `
-            <h2 class="section-title" style="margin-top:0;">📖 Materi Interaktif SMA — ${(App.getState().track || 'ipa').toUpperCase()}</h2>
-            <p class="section-subtitle">Belajar visual, bukan teks panjang. Klik kartu, geser slider, dan eksperimen langsung!</p>
-            <div class="lesson-grid">
-                ${visible().map(l => {
-                    const done = state.completedLessons.includes(l.id);
-                    const prog = state.lessonProgress[l.id] || 0;
-                    const pct = done ? 100 : Math.round((prog / l.steps.length) * 100);
-                    return `
-                    <div class="lesson-card card-clickable" style="--lc:${l.color}" onclick="Materi.openLesson('${l.id}')">
-                        <div class="lc-icon" style="background:${l.color}22">${l.icon}</div>
-                        <div class="lc-info">
-                            <div class="lc-title">${l.title}</div>
-                            <div class="lc-desc">${l.desc}</div>
-                            <div class="lc-meta">
-                                <span class="badge badge-primary lc-badge">${l.subject}</span>
-                                <span class="badge badge-warning lc-badge">${l.grade}</span>
-                                <span class="badge badge-success lc-badge">⏱️ ${l.duration}</span>
-                                ${done ? '<span class="badge badge-success lc-badge">✅ Selesai</span>' : ''}
-                            </div>
-                            ${!done && prog > 0 ? `<div class="progress-bar" style="margin-top:8px;"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+        const track = (state.track || 'ipa').toUpperCase();
+        const allVisible = visible();
+
+        // Cari mata pelajaran apa saja yang ada pada jurusan saat ini
+        const presentSubjects = SUBJECT_ORDER.filter(s => allVisible.some(l => l.subject === s));
+
+        // Jika filter yang dipilih tidak ada pada jurusan ini, reset ke 'Semua'
+        if (currentSubjectFilter !== 'Semua' && !presentSubjects.includes(currentSubjectFilter)) {
+            currentSubjectFilter = 'Semua';
+        }
+
+        let contentHtml = '';
+
+        if (currentSubjectFilter !== 'Semua') {
+            // Mode per mata pelajaran: tampilkan banner dan materi mata pelajaran terpilih
+            const filtered = allVisible.filter(l => l.subject === currentSubjectFilter);
+            const icon = SUBJECT_ICONS[currentSubjectFilter] || '📘';
+            const completedCount = filtered.filter(l => state.completedLessons.includes(l.id)).length;
+
+            contentHtml = `
+                <div class="subject-banner">
+                    <div class="sb-left">
+                        <span class="sb-icon">${icon}</span>
+                        <div>
+                            <h3 class="sb-title">Menu Materi ${currentSubjectFilter}</h3>
+                            <p class="sb-desc">${filtered.length} materi interaktif • ${completedCount}/${filtered.length} selesai</p>
                         </div>
-                        <span class="lc-arrow">→</span>
-                    </div>`;
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="Materi.setSubjectFilter('Semua')">← Lihat Semua Mapel</button>
+                </div>
+                <div class="lesson-grid">
+                    ${filtered.map(l => renderLessonCard(l, state)).join('')}
+                </div>
+            `;
+        } else {
+            // Mode semua mata pelajaran: dikelompokkan secara terstruktur per mata pelajaran
+            contentHtml = presentSubjects.map(subj => {
+                const subjectLessons = allVisible.filter(l => l.subject === subj);
+                const icon = SUBJECT_ICONS[subj] || '📘';
+                const completedInSubj = subjectLessons.filter(l => state.completedLessons.includes(l.id)).length;
+                return `
+                    <div class="subject-group-section">
+                        <div class="subject-section-header">
+                            <div class="ssh-title-wrap">
+                                <span class="ssh-icon">${icon}</span>
+                                <h3 class="ssh-title">${subj}</h3>
+                                <span class="badge badge-primary">${subjectLessons.length} Materi</span>
+                                ${completedInSubj > 0 ? `<span class="badge badge-success">${completedInSubj}/${subjectLessons.length} Selesai</span>` : ''}
+                            </div>
+                            <button class="ssh-link-btn" onclick="Materi.setSubjectFilter('${subj}')">Hanya ${subj} →</button>
+                        </div>
+                        <div class="lesson-grid">
+                            ${subjectLessons.map(l => renderLessonCard(l, state)).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        page.innerHTML = `
+            <h2 class="section-title" style="margin-top:0;">📖 Materi Interaktif SMA — ${track}</h2>
+            <p class="section-subtitle">Materi sudah dikelompokkan per mata pelajaran. Klik menu mata pelajaran di bawah untuk memilih!</p>
+
+            <!-- Menu Filter Tab Mata Pelajaran -->
+            <div class="subject-filter-nav">
+                <button class="chip ${currentSubjectFilter === 'Semua' ? 'active' : ''}" onclick="Materi.setSubjectFilter('Semua')">
+                    🌟 Semua Mapel (${allVisible.length})
+                </button>
+                ${presentSubjects.map(s => {
+                    const count = allVisible.filter(l => l.subject === s).length;
+                    const icon = SUBJECT_ICONS[s] || '📘';
+                    return `
+                        <button class="chip ${currentSubjectFilter === s ? 'active' : ''}" onclick="Materi.setSubjectFilter('${s}')">
+                            ${icon} ${s} (${count})
+                        </button>
+                    `;
                 }).join('')}
-            </div>`;
+            </div>
+
+            ${contentHtml}
+        `;
     }
 
     function openLesson(id) {
@@ -491,5 +590,5 @@ const Materi = (() => {
     }
     init();
 
-    return { renderList, openLesson, nextStep, prevStep, completeLesson, backToList, revealCard, count, completedCount, register, visible, newtonUpdate, parabolaUpdate, atomUpdate };
+    return { renderList, setSubjectFilter, openLesson, nextStep, prevStep, completeLesson, backToList, revealCard, count, completedCount, register, visible, newtonUpdate, parabolaUpdate, atomUpdate };
 })();
