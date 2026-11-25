@@ -3,32 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RuangPintar — E-Learning Interaktif SMA (IPA & IPS)</title>
-    <meta name="description" content="Belajar SMA jadi seru: materi interaktif IPA & IPS, kuis kilat, AI Tutor, dan forum tanya anonim.">
-    <meta name="theme-color" content="#6C5CE7">
-    <meta property="og:title" content="RuangPintar — E-Learning Interaktif SMA">
-    <meta property="og:description" content="Materi interaktif IPA & IPS, kuis kilat, AI Tutor, dan forum tanya anonim.">
+    <title>RuangPintar · Belajar SMA IPA & IPS</title>
+    <meta name="description" content="Materi interaktif IPA & IPS, kuis pemanasan, rangkuman rumus, dan forum tanya anonim untuk siswa SMA.">
+    <meta name="theme-color" content="#0A0E17">
+    <meta property="og:title" content="RuangPintar">
+    <meta property="og:description" content="Materi interaktif IPA & IPS, kuis pemanasan, rangkuman rumus, dan forum tanya anonim.">
     <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%238B5CF6'/%3E%3Cpath d='M10 23V9h6.5a4.5 4.5 0 0 1 0 9H10m7 0 5.5 5' stroke='white' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>
 
     <!-- ===== TOP BAR ===== -->
     <header class="topbar">
         <div class="topbar-left">
-            <span class="logo-icon">📚</span>
+            <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+                <rect width="32" height="32" rx="9" fill="#8B5CF6"/>
+                <path d="M10 23V9h6.5a4.5 4.5 0 0 1 0 9H10m7 0 5.5 5" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <h1 class="app-title">Ruang<span class="highlight">Pintar</span></h1>
         </div>
         <div class="topbar-right">
-            <button id="btn-track" class="track-pill" onclick="App.showOnboarding()" title="Ganti jurusan">🎓 <span id="track-text">IPA</span></button>
+            <button id="btn-track" class="track-pill" onclick="App.showOnboarding()" title="Ganti jurusan"><span id="track-text">IPA</span></button>
             <div class="level-pill" title="Level & XP"><span id="level-text">Lv 1 · 0/100</span><div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div></div>
-            <div class="streak-badge" id="streak-badge" title="Streak kamu">
-                <span>🔥</span>
+            <div class="streak-badge" id="streak-badge" title="Streak belajar">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3.5 5 5.5 5 10.5A5 5 0 0 1 7 12.5c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>
                 <span id="streak-count">0</span>
             </div>
-            <button id="btn-theme" class="theme-pill" title="Ganti Mode Gelap / Terang">
-                <span id="theme-icon">🌙</span>
+            <button id="btn-theme" class="theme-pill" title="Ganti mode gelap / terang">
+                <span id="theme-icon" class="theme-ico"></span>
                 <span id="theme-text" class="theme-text">Gelap</span>
             </button>
         </div>
@@ -48,30 +54,33 @@
     <!-- ===== BOTTOM NAVIGATION ===== -->
     <nav class="bottom-nav">
         <button class="nav-item active" data-page="beranda">
-            <span class="nav-icon">🏠</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
             <span class="nav-label">Beranda</span>
         </button>
         <button class="nav-item" data-page="materi">
-            <span class="nav-icon">📖</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h8M8 11h5"/></svg>
             <span class="nav-label">Materi</span>
         </button>
         <button class="nav-item" data-page="kuis">
-            <span class="nav-icon">🧠</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.5v.5"/><path d="M12 17h.01"/></svg>
             <span class="nav-label">Kuis</span>
         </button>
         <button class="nav-item" data-page="tanya">
-            <span class="nav-icon">💬</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
             <span class="nav-label">Tanya</span>
         </button>
         <button class="nav-item" data-page="ai">
-            <span class="nav-icon">🤖</span>
-            <span class="nav-label">AI Tutor</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9.5 17h5"/></svg>
+            <span class="nav-label">Tutor</span>
         </button>
         <button class="nav-item" data-page="profil">
-            <span class="nav-icon">👤</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
             <span class="nav-label">Profil</span>
         </button>
     </nav>
+
+    <!-- ===== AKUN / DAFTAR (scan kartu pelajar) ===== -->
+    <div id="auth-screen" class="auth-screen hidden"></div>
 
     <!-- ===== TOAST ===== -->
     <div id="toast" class="toast"></div>
@@ -83,6 +92,7 @@
 
     <!-- ===== SCRIPTS ===== -->
     <script src="js/app.js"></script>
+    <script src="js/akun.js"></script>
     <script src="js/materi.js"></script>
     <script src="js/materi2.js"></script>
     <script src="js/rangkuman.js"></script>

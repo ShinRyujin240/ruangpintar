@@ -291,12 +291,12 @@ const Rangkuman = (() => {
         const idx = memorizedIds.indexOf(id);
         if (idx >= 0) {
             memorizedIds.splice(idx, 1);
-            if (typeof App !== 'undefined') App.showToast('Belum dihafal, yuk baca ulang lagi! 💪');
+            if (typeof App !== 'undefined') App.showToast('Tanda hafal dihapus');
         } else {
             memorizedIds.push(id);
             if (typeof App !== 'undefined') {
-                App.addXP(15);
-                App.showToast('⭐ Keren! 1 Rumus ditandai hafal (+15 XP)');
+                App.addXP(15, true);
+                App.showToast('Ditandai hafal · +15 XP');
             }
         }
         try {
@@ -315,7 +315,7 @@ const Rangkuman = (() => {
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(textToCopy).then(() => {
-                if (typeof App !== 'undefined') App.showToast('📋 Rumus berhasil disalin ke clipboard!');
+                if (typeof App !== 'undefined') App.showToast('Rumus disalin');
             }).catch(() => fallbackCopy(textToCopy));
         } else {
             fallbackCopy(textToCopy);
@@ -331,9 +331,9 @@ const Rangkuman = (() => {
         ta.select();
         try {
             document.execCommand('copy');
-            if (typeof App !== 'undefined') App.showToast('📋 Rumus berhasil disalin!');
+            if (typeof App !== 'undefined') App.showToast('Rumus disalin');
         } catch (e) {
-            if (typeof App !== 'undefined') App.showToast('⚠️ Gagal menyalin, peramban tidak mendukung');
+            if (typeof App !== 'undefined') App.showToast('Gagal menyalin di browser ini');
         }
         document.body.removeChild(ta);
     }
@@ -350,9 +350,117 @@ const Rangkuman = (() => {
         renderListOnly();
     }
 
-    // Cetak / Print Cheat Sheet
+    function getFilteredCards(cards) {
+        let filtered = cards || getVisibleCards();
+        if (activeSubject !== 'Semua') {
+            filtered = filtered.filter(c => c.subject === activeSubject);
+        }
+        if (searchQuery) {
+            filtered = filtered.filter(c =>
+                c.title.toLowerCase().includes(searchQuery) ||
+                c.subject.toLowerCase().includes(searchQuery) ||
+                c.formula.toLowerCase().includes(searchQuery) ||
+                c.mnemonic.toLowerCase().includes(searchQuery) ||
+                c.keys.some(k => k.toLowerCase().includes(searchQuery))
+            );
+        }
+        return filtered;
+    }
+
+    function buildPrintHeaderHtml() {
+        const s = typeof App !== 'undefined' ? App.getState() : {};
+        const acc = s.account || {};
+        const nama = acc.nama || s.studentName || 'Siswa';
+        const info = [acc.kelas, acc.sekolah, acc.nisn ? 'NISN ' + acc.nisn : ''].filter(Boolean).join(' · ');
+        const mapel = activeSubject === 'Semua' ? (s.track === 'ips' ? 'Semua Mapel IPS' : 'Semua Mapel IPA') : activeSubject;
+        const tgl = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        return `
+            <div class="ph-top">
+                <div><strong>RuangPintar</strong> · Rangkuman & Rumus SMA</div>
+                <div>${tgl}</div>
+            </div>
+            <div class="ph-meta">${nama}${info ? ' (' + info + ')' : ''} · ${mapel}</div>`;
+    }
+
+    // Cetak / Print PDF
     function printCheatSheet() {
-        window.print();
+        const ph = document.getElementById('rangkuman-print-header');
+        if (ph) ph.innerHTML = buildPrintHeaderHtml();
+
+        const html = document.documentElement;
+        const prevTheme = html.getAttribute('data-theme') || 'dark';
+        html.setAttribute('data-theme', 'light');
+
+        let restored = false;
+        const restore = () => {
+            if (restored) return;
+            restored = true;
+            html.setAttribute('data-theme', prevTheme);
+            window.removeEventListener('afterprint', restore);
+        };
+        window.addEventListener('afterprint', restore);
+
+        if (typeof window.print === 'function') {
+            try {
+                window.print();
+            } catch (e) {
+                restore();
+                downloadCheatSheet();
+                return;
+            }
+            setTimeout(restore, 1500);
+        } else {
+            restore();
+            downloadCheatSheet();
+        }
+    }
+
+    // Unduh versi HTML siap cetak (fallback paling aman di HP / in-app browser)
+    function downloadCheatSheet() {
+        const cards = getFilteredCards();
+        if (!cards.length) {
+            if (typeof App !== 'undefined') App.showToast('Tidak ada rangkuman untuk diunduh');
+            return;
+        }
+        const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const body = cards.map(item => `
+            <article class="card">
+                <div class="meta">${esc(item.subject)} · ${esc(item.grade)}</div>
+                <h2>${esc(item.title)}</h2>
+                <pre class="formula">${esc(item.formula)}</pre>
+                <p class="memo"><b>Cara ingat:</b> ${esc(item.mnemonic.replace(/^\S+\s/, m => /[A-Za-z0-9]/.test(m) ? m : ''))}</p>
+                <ul>${item.keys.map(k => `<li>${esc(k)}</li>`).join('')}</ul>
+                ${item.example ? `<p class="ex"><b>Contoh:</b> ${esc(item.example)}</p>` : ''}
+            </article>`).join('');
+
+        const doc = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Rangkuman RuangPintar</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;color:#111;max-width:780px;margin:24px auto;padding:0 16px;line-height:1.5}
+.head{border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:18px;font-size:13px;color:#444}
+.head strong{font-size:16px;color:#111}
+.card{border:1px solid #d1d5db;border-radius:10px;padding:14px 16px;margin-bottom:14px;break-inside:avoid}
+.meta{font-size:11px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.04em}
+h2{margin:4px 0 10px;font-size:16px}
+.formula{background:#f3f4f6;border-left:3px solid #4f46e5;padding:10px 12px;border-radius:6px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap;margin:0 0 10px}
+.memo{background:#fffbeb;border:1px solid #fcd34d;padding:8px 10px;border-radius:6px;font-size:12.5px;margin:0 0 8px}
+ul{margin:0 0 8px;padding-left:18px;font-size:12.5px}
+.ex{font-size:12px;color:#374151;margin:0}
+@media print{body{margin:0;max-width:100%}.no-print{display:none}}
+</style></head><body>
+<div class="head">${buildPrintHeaderHtml()}</div>
+<p class="no-print" style="margin-bottom:16px"><button onclick="window.print()" style="padding:8px 14px;font-weight:700;cursor:pointer">Cetak / Simpan PDF</button></p>
+${body}</body></html>`;
+
+        const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Rangkuman-RuangPintar-${activeSubject.toLowerCase()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        if (typeof App !== 'undefined') App.showToast('File rangkuman diunduh');
     }
 
     // Render Utama
@@ -369,22 +477,26 @@ const Rangkuman = (() => {
 
         page.innerHTML = `
             <div class="rangkuman-view">
+                <div class="print-header" id="rangkuman-print-header">${buildPrintHeaderHtml()}</div>
+
                 <!-- Navigation Switcher antara Modul Interaktif & Rangkuman Kilat -->
                 <div class="materi-mode-tabs">
-                    <button class="materi-mode-tab" onclick="App.navigate('materi')">📖 Modul Interaktif</button>
-                    <button class="materi-mode-tab active" onclick="App.navigate('rangkuman')">⚡ Rangkuman & Cheat Sheet</button>
+                    <button class="materi-mode-tab" onclick="App.navigate('materi')">Modul interaktif</button>
+                    <button class="materi-mode-tab active" onclick="App.navigate('rangkuman')">Rangkuman</button>
                 </div>
 
                 <!-- Hero Banner Rangkuman -->
                 <div class="rangkuman-hero">
                     <div class="rh-left">
-                        <div class="rh-tag">⚡ Solusi Survey Rank 4 (Skor 3.26)</div>
-                        <h2 class="rh-title">Rangkuman Kilat & Rumus Cepat</h2>
-                        <p class="rh-desc">Cheat sheet rumus penting, jembatan keledai, dan konsep esensial SMA siap pakai H-1 ujian tanpa pusing buka buku tebal!</p>
+                        <h2 class="rh-title">Rangkuman & rumus</h2>
+                        <p class="rh-desc">Rumus penting plus cara gampang ngingetnya, dirangkum per bab. Tandai yang udah hafal biar kelihatan mana yang masih perlu diulang.</p>
                     </div>
                     <div class="rh-actions">
                         <button class="btn btn-outline btn-sm rh-print-btn" onclick="Rangkuman.printCheatSheet()" title="Cetak atau simpan sebagai PDF">
-                            🖨️ Cetak / PDF
+                            Cetak / PDF
+                        </button>
+                        <button class="btn btn-secondary btn-sm rh-print-btn" onclick="Rangkuman.downloadCheatSheet()" title="Unduh file siap cetak untuk dibuka offline">
+                            Unduh (.html)
                         </button>
                     </div>
                 </div>
@@ -393,34 +505,33 @@ const Rangkuman = (() => {
                 <div class="hafal-tracker-card">
                     <div class="htc-info">
                         <div class="htc-title">
-                            <span>🧠 Tracker Hafalan Rumus</span>
-                            <span class="htc-score">${totalMemorized} / ${totalCards} Dihafal (${percentMemorized}%)</span>
+                            <span>Progres hafalan</span>
+                            <span class="htc-score">${totalMemorized} dari ${totalCards} (${percentMemorized}%)</span>
                         </div>
                         <div class="progress-bar" style="height:10px; margin-top:8px;">
                             <div class="progress-fill" style="width: ${percentMemorized}%; background: var(--gradient-secondary);"></div>
                         </div>
                     </div>
                     <div class="htc-badge">
-                        ${percentMemorized === 100 ? '👑 Master Rumus!' : percentMemorized >= 50 ? '🔥 Mantap, Terus Lanjut!' : '🌱 Ayo Mulai Hafalkan!'}
+                        ${percentMemorized === 100 ? 'Semua udah hafal' : percentMemorized >= 50 ? 'Lewat setengah jalan' : totalMemorized > 0 ? 'Lanjutin terus' : 'Belum ada yang ditandai'}
                     </div>
                 </div>
 
                 <!-- Search & Filters -->
                 <div class="rangkuman-controls">
                     <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="rangkuman-search" placeholder="Cari rumus atau konsep... (misal: GLBB, mol, trigonometri, inflasi)" 
+                        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                        <input type="text" id="rangkuman-search" placeholder="Cari rumus, misal: GLBB, mol, inflasi" 
                                value="${searchQuery}" oninput="Rangkuman.onSearch(this.value)">
                         ${searchQuery ? `<button class="clear-search-btn" onclick="Rangkuman.clearSearch()">✕</button>` : ''}
                     </div>
 
                     <div class="chip-row">
                         ${subjects.map(s => {
-                            const icon = s === 'Semua' ? '🌟' : getSubjectIcon(s);
                             const count = s === 'Semua' ? visibleCards.length : visibleCards.filter(c => c.subject === s).length;
                             return `
                                 <button class="chip ${activeSubject === s ? 'active' : ''}" onclick="Rangkuman.setSubject('${s}')">
-                                    ${icon} ${s} (${count})
+                                    ${s} <span class="chip-count">${count}</span>
                                 </button>
                             `;
                         }).join('')}
@@ -449,24 +560,11 @@ const Rangkuman = (() => {
     }
 
     function renderCardsHtml(cards) {
-        let filtered = cards;
-        if (activeSubject !== 'Semua') {
-            filtered = filtered.filter(c => c.subject === activeSubject);
-        }
-        if (searchQuery) {
-            filtered = filtered.filter(c => 
-                c.title.toLowerCase().includes(searchQuery) ||
-                c.subject.toLowerCase().includes(searchQuery) ||
-                c.formula.toLowerCase().includes(searchQuery) ||
-                c.mnemonic.toLowerCase().includes(searchQuery) ||
-                c.keys.some(k => k.toLowerCase().includes(searchQuery))
-            );
-        }
+        const filtered = getFilteredCards(cards);
 
         if (filtered.length === 0) {
             return `
                 <div class="empty-state" style="grid-column: 1 / -1; padding: 40px 20px; text-align: center;">
-                    <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
                     <h3>Rumus atau konsep tidak ditemukan</h3>
                     <p style="color: var(--text-secondary);">Coba kata kunci lain atau pilih filter mata pelajaran yang berbeda.</p>
                 </div>
@@ -475,42 +573,37 @@ const Rangkuman = (() => {
 
         return filtered.map(item => {
             const isMemorized = memorizedIds.includes(item.id);
-            const icon = getSubjectIcon(item.subject);
 
             return `
                 <div class="cheat-card ${isMemorized ? 'memorized' : ''}" id="card-${item.id}">
                     <div class="cc-header">
                         <div class="cc-badge-group">
-                            <span class="badge badge-primary">${icon} ${item.subject}</span>
+                            <span class="badge badge-primary">${item.subject}</span>
                             <span class="badge badge-outline">${item.grade}</span>
                         </div>
                         <div class="cc-actions">
                             <button class="hafal-btn ${isMemorized ? 'active' : ''}" onclick="Rangkuman.toggleHafal('${item.id}')" title="${isMemorized ? 'Tandai belum hafal' : 'Tandai sudah hafal'}">
-                                ${isMemorized ? '⭐ Sudah Hafal' : '☆ Tandai Hafal'}
+                                ${isMemorized ? '✓ Hafal' : 'Tandai hafal'}
                             </button>
-                            <button class="copy-btn" onclick="Rangkuman.copyFormula('${item.id}')" title="Salin rumus ke clipboard">
-                                📋
+                            <button class="copy-btn" onclick="Rangkuman.copyFormula('${item.id}')" title="Salin">
+                                <svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>
                             </button>
                         </div>
                     </div>
 
                     <h3 class="cc-title">${item.title}</h3>
 
-                    <!-- Kotak Rumus / Formula Utama -->
                     <div class="formula-box">
-                        <div class="fb-tag">⚡ Rumus / Konsep Utama</div>
+                        <div class="fb-tag">Rumus inti</div>
                         <pre class="fb-content">${item.formula}</pre>
                     </div>
 
-                    <!-- Mnemonic / Jembatan Keledai Cepat Hafal -->
                     <div class="mnemonic-box">
-                        <span class="mb-icon">💡</span>
-                        <div class="mb-text">${item.mnemonic}</div>
+                        <div class="mb-text"><b>Cara ingat:</b> ${item.mnemonic.replace(/^\S+\s/, m => /[A-Za-z0-9]/.test(m) ? m : '')}</div>
                     </div>
 
-                    <!-- Poin Kunci Ringkas -->
                     <div class="keys-list">
-                        <div class="kl-label">🔑 Poin Penting Ujian:</div>
+                        <div class="kl-label">Yang sering keluar</div>
                         <ul>
                             ${item.keys.map(k => `<li>${k}</li>`).join('')}
                         </ul>
@@ -518,14 +611,14 @@ const Rangkuman = (() => {
 
                     ${item.example ? `
                         <div class="example-box">
-                            <span class="eb-badge">Contoh Cepat:</span>
+                            <span class="eb-badge">Contoh:</span>
                             <span class="eb-text">${item.example}</span>
                         </div>
                     ` : ''}
 
                     <div class="cc-footer">
                         <button class="btn-ask-ai-mini" onclick="AITutor.askAbout('Tolong jelaskan lebih dalam tentang rumus & konsep ${item.subject}: ${item.title}')">
-                            🤖 Tanya AI Tutor tentang rumus ini →
+                            Masih bingung? Tanya tutor
                         </button>
                     </div>
                 </div>
@@ -554,7 +647,8 @@ const Rangkuman = (() => {
         clearSearch,
         toggleHafal,
         copyFormula,
-        printCheatSheet
+        printCheatSheet,
+        downloadCheatSheet
     };
 
 })();

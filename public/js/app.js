@@ -20,6 +20,7 @@ const App = (() => {
         upvotes: {},
         lastActiveDate: null,
         track: null,
+        account: null,
         xp: 0
     };
 
@@ -68,16 +69,19 @@ const App = (() => {
                 html.setAttribute('data-theme', state.theme);
                 updateThemeIcon();
                 saveState();
-                showToast(state.theme === 'dark' ? '🌙 Mode Malam diaktifkan' : '☀️ Mode Siang diaktifkan');
+                showToast(state.theme === 'dark' ? 'Mode gelap' : 'Mode terang');
             });
         }
     }
+
+    const ICO_MOON = '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+    const ICO_SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 
     function updateThemeIcon() {
         const isDark = state.theme === 'dark';
         const icon = document.getElementById('theme-icon');
         const text = document.getElementById('theme-text');
-        if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        if (icon) icon.innerHTML = isDark ? ICO_MOON : ICO_SUN;
         if (text) text.textContent = isDark ? 'Gelap' : 'Terang';
 
         // Update mobile status bar theme-color
@@ -212,61 +216,58 @@ const App = (() => {
             ? Math.round(state.quizScores.reduce((a, s) => a + (s.score / s.total) * 100, 0) / state.quizScores.length)
             : 0;
 
+        const acc = state.account;
+        const now = new Date();
+        const dateLine = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+        const who = acc ? [acc.kelas, acc.sekolah].filter(Boolean).join(' · ') : 'Jurusan ' + trackLabel();
+        const tile = (page, cls, svg, title, sub) => `
+            <button class="menu-tile ${cls}" onclick="App.navigate('${page}')">
+                <span class="mt-ico"><svg viewBox="0 0 24 24">${svg}</svg></span>
+                <span class="mt-text"><span class="mt-title">${title}</span><span class="mt-sub">${sub}</span></span>
+            </button>`;
+
         page.innerHTML = `
-            <div class="hero-card">
-                <h2>${getGreeting()}, ${escapeHtml(state.studentName)}! 👋</h2>
-                <p>🎓 Jurusan ${trackLabel()} · Belajar SMA jadi seru: materi interaktif, kuis kilat, tanya anonim, dan AI Tutor yang siap membantu 24 jam.</p>
+            <div class="hello">
+                <div class="hello-date">${dateLine}</div>
+                <h2 class="hello-title">${getGreeting()}, ${escapeHtml(state.studentName)}.</h2>
+                <div class="hello-meta">${escapeHtml(who)}</div>
+                ${!acc ? `<button class="hello-cta" onclick="Akun.open()">Daftar pakai kartu pelajar →</button>` : ''}
             </div>
 
             <div class="stats-row">
-                <div class="stat-card"><div class="stat-number">${completedCount}</div><div class="stat-label">Materi Selesai</div></div>
-                <div class="stat-card"><div class="stat-number">${avgScore}%</div><div class="stat-label">Rata-rata Kuis</div></div>
-                <div class="stat-card"><div class="stat-number">${state.questions.length}</div><div class="stat-label">Pertanyaan</div></div>
+                <div class="stat-card"><div class="stat-number">${completedCount}</div><div class="stat-label">Materi selesai</div></div>
+                <div class="stat-card"><div class="stat-number">${avgScore}%</div><div class="stat-label">Rata-rata kuis</div></div>
+                <div class="stat-card"><div class="stat-number">${state.xp || 0}</div><div class="stat-label">Total XP</div></div>
             </div>
 
-            <h3 class="section-title">🚀 Mau belajar apa hari ini?</h3>
-            <div class="feature-grid">
-                <div class="feature-card purple card-clickable" onclick="App.navigate('materi')">
-                    <span class="fc-icon">📖</span><span class="fc-title">Materi Interaktif</span>
-                </div>
-                <div class="feature-card cyan card-clickable" onclick="App.navigate('rangkuman')">
-                    <span class="fc-icon">⚡</span><span class="fc-title">Rangkuman Kilat</span>
-                </div>
-                <div class="feature-card green card-clickable" onclick="App.navigate('kuis')">
-                    <span class="fc-icon">🧠</span><span class="fc-title">Kuis Pemanasan</span>
-                </div>
-                <div class="feature-card orange card-clickable" onclick="App.navigate('tanya')">
-                    <span class="fc-icon">💬</span><span class="fc-title">Tanya Bebas</span>
-                </div>
-                <div class="feature-card pink card-clickable" onclick="App.navigate('ai')">
-                    <span class="fc-icon">🤖</span><span class="fc-title">Tanya AI Tutor</span>
-                </div>
+            <h3 class="section-title">Mau ngapain hari ini?</h3>
+            <div class="menu-grid">
+                ${tile('materi', 't-violet', '<path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2.5z"/><path d="M8 7h8M8 11h5"/>', 'Materi interaktif', 'Belajar lewat simulasi')}
+                ${tile('rangkuman', 't-cyan', '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>', 'Rangkuman', 'Rumus & cara ingat')}
+                ${tile('kuis', 't-green', '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.5v.5M12 17h.01"/>', 'Kuis pemanasan', '5 menit sebelum kelas')}
+                ${tile('tanya', 't-amber', '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>', 'Tanya anonim', 'Nggak ada yang tahu kamu')}
+                ${tile('ai', 't-pink', '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9.5 17h5"/>', 'Tutor', 'Tanya kapan aja')}
             </div>
 
-            <h3 class="section-title">📊 Mengapa Aplikasi Ini Dibuat?</h3>
-            <p class="section-subtitle">Berdasarkan survei 47 siswa SMA — solusi bertahap yang kami hadirkan:</p>
+            <h3 class="section-title">Kenapa kami bikin ini</h3>
+            <p class="section-subtitle">Kami survei 47 teman SMA. Ini empat hal yang paling sering dikeluhkan (skala 1–5):</p>
             <div class="survey-bars card">
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🎨 Butuh Media Visual & Interaktif (Rank 1)</span><span class="sl-score">4.53 / 5.00</span></div>
+                    <div class="survey-label"><span class="sl-name">Lebih paham kalau ada visual & praktik</span><span class="sl-score">4.53</span></div>
                     <div class="survey-bar-bg"><div class="survey-bar-fill" data-width="91" style="width:0%"></div></div>
                 </div>
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🧩 Butuh Kuis Pemanasan Awal Kelas (Rank 2)</span><span class="sl-score">4.21 / 5.00</span></div>
+                    <div class="survey-label"><span class="sl-name">Pemanasan / kuis di awal kelas membantu</span><span class="sl-score">4.21</span></div>
                     <div class="survey-bar-bg"><div class="survey-bar-fill green" data-width="84" style="width:0%"></div></div>
                 </div>
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">🤐 Malu Bertanya di Kelas / Takut Salah (Rank 3)</span><span class="sl-score">3.43 / 5.00</span></div>
+                    <div class="survey-label"><span class="sl-name">Malu bertanya, jadi pura-pura paham</span><span class="sl-score">3.43</span></div>
                     <div class="survey-bar-bg"><div class="survey-bar-fill warm" data-width="69" style="width:0%"></div></div>
                 </div>
                 <div class="survey-item">
-                    <div class="survey-label"><span class="sl-name">⚡ Lupa Materi & Butuh Rangkuman Cepat (Rank 4)</span><span class="sl-score">3.26 / 5.00</span></div>
+                    <div class="survey-label"><span class="sl-name">Lupa materi lama, nggak punya catatan ringkas</span><span class="sl-score">3.26</span></div>
                     <div class="survey-bar-bg"><div class="survey-bar-fill cyan" data-width="65" style="width:0%"></div></div>
                 </div>
-            </div>
-
-            <div class="card" style="margin-top:20px;text-align:center;padding:24px;">
-                <p style="font-size:24px;margin-bottom:8px;">💡</p>
-                <p style="font-size:14px;color:var(--text-secondary);font-style:italic;">"Satu-satunya pertanyaan bodoh adalah pertanyaan yang tidak ditanyakan."</p>
             </div>`;
 
         setTimeout(() => {
@@ -286,41 +287,36 @@ const App = (() => {
         const level = Math.floor((state.xp || 0) / 100) + 1;
 
         const achievements = [
-            { icon: '🌟', name: 'Pelajar Pertama', desc: 'Selesaikan 1 materi', unlocked: completed >= 1 },
-            { icon: '📚', name: 'Kutu Buku', desc: 'Selesaikan semua materi', unlocked: completed >= totalLessons },
-            { icon: '🧠', name: 'Otak Encer', desc: 'Raih skor 100% di kuis', unlocked: bestScore === 100 },
-            { icon: '🔥', name: 'On Fire!', desc: 'Streak 3 berturut-turut', unlocked: state.bestStreak >= 3 },
-            { icon: '💬', name: 'Berani Bertanya', desc: 'Ajukan pertanyaan pertamamu', unlocked: state.questions.length >= 1 },
-            { icon: '🏆', name: 'Juara Kuis', desc: 'Selesaikan 5 kuis', unlocked: totalQuizzes >= 5 },
-            { icon: '🆙', name: 'Naik Level', desc: 'Capai Level 3', unlocked: level >= 3 }
+            { name: 'Langkah pertama', desc: 'Selesaikan 1 materi', unlocked: completed >= 1 },
+            { name: 'Kutu buku', desc: 'Selesaikan semua materi', unlocked: completed >= totalLessons },
+            { name: 'Sempurna', desc: 'Dapat 100% di satu kuis', unlocked: bestScore === 100 },
+            { name: 'Konsisten', desc: 'Streak 3 kali berturut-turut', unlocked: state.bestStreak >= 3 },
+            { name: 'Berani nanya', desc: 'Kirim pertanyaan pertama', unlocked: state.questions.length >= 1 },
+            { name: 'Rajin kuis', desc: 'Selesaikan 5 kuis', unlocked: totalQuizzes >= 5 },
+            { name: 'Naik level', desc: 'Sampai level 3', unlocked: level >= 3 }
         ];
+        const got = achievements.filter(a => a.unlocked).length;
 
         page.innerHTML = `
-            <div class="profile-header">
-                <div class="profile-avatar">👤</div>
-                <div class="profile-name">${escapeHtml(state.studentName)}</div>
-                <div class="profile-role">Siswa RuangPintar · Level ${level} · ${state.xp || 0} XP</div>
-                <button class="btn btn-sm btn-outline" style="margin-top:10px;" onclick="App.editName()">✏️ Ubah Nama</button>
-            </div>
+            ${typeof Akun !== 'undefined' ? Akun.cardHtml() : ''}
             <div class="profile-stats">
-                <div class="profile-stat-card"><span class="ps-icon">📖</span><div class="ps-value">${completed}/${totalLessons}</div><div class="ps-label">Materi Selesai</div></div>
-                <div class="profile-stat-card"><span class="ps-icon">🧠</span><div class="ps-value">${totalQuizzes}</div><div class="ps-label">Kuis Dikerjakan</div></div>
-                <div class="profile-stat-card"><span class="ps-icon">🏆</span><div class="ps-value">${bestScore}%</div><div class="ps-label">Skor Terbaik</div></div>
-                <div class="profile-stat-card"><span class="ps-icon">🔥</span><div class="ps-value">${state.bestStreak}</div><div class="ps-label">Best Streak</div></div>
+                <div class="profile-stat-card"><div class="ps-value">${completed}/${totalLessons}</div><div class="ps-label">Materi selesai</div></div>
+                <div class="profile-stat-card"><div class="ps-value">${totalQuizzes}</div><div class="ps-label">Kuis dikerjakan</div></div>
+                <div class="profile-stat-card"><div class="ps-value">${bestScore}%</div><div class="ps-label">Skor terbaik</div></div>
+                <div class="profile-stat-card"><div class="ps-value">${state.bestStreak}</div><div class="ps-label">Streak terbaik</div></div>
             </div>
             <div class="profile-section">
-                <h3>🏅 Pencapaian</h3>
+                <h3>Pencapaian <span class="muted-count">${got}/${achievements.length}</span></h3>
                 <div class="achievement-list">
                     ${achievements.map(a => `
                         <div class="achievement-item ${a.unlocked ? '' : 'locked'}">
-                            <span class="ai-icon">${a.icon}</span>
+                            <span class="ach-dot">${a.unlocked ? '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>' : '<svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8.5a3 3 0 0 1 6 0V11"/></svg>'}</span>
                             <div class="ai-info"><div class="ai-name">${a.name}</div><div class="ai-desc">${a.desc}</div></div>
-                            ${a.unlocked ? '<span class="badge badge-success">✓</span>' : '<span class="badge badge-warning">🔒</span>'}
                         </div>`).join('')}
                 </div>
             </div>
             <div style="margin-top:30px;text-align:center;">
-                <button class="btn btn-sm btn-secondary" onclick="App.resetData()">🗑️ Reset Semua Data</button>
+                <button class="btn btn-sm btn-secondary" onclick="App.resetData()">Reset semua progres</button>
             </div>`;
     }
 
@@ -363,9 +359,9 @@ const App = (() => {
         loadState();
         updateStreakBadge();
         closeModal();
-        showToast('Data berhasil direset! 🔄');
-        setTimeout(showOnboarding, 50);
+        showToast('Semua data sudah direset');
         navigate('beranda');
+        setTimeout(() => { if (typeof Akun !== 'undefined') Akun.open(); else showOnboarding(); }, 50);
     }
 
     // -------- JURUSAN (IPA / IPS) --------
@@ -374,24 +370,23 @@ const App = (() => {
     function showOnboarding() {
         const first = !state.track;
         showModal(`
-            <div style="font-size:52px;">🎓</div>
-            <h2>${first ? 'Selamat datang di RuangPintar!' : 'Ganti Jurusan'}</h2>
-            <p>${first ? 'Kenalan dulu, yuk! Isi namamu dan pilih jurusanmu. Materi &amp; kuis akan menyesuaikan.' : 'Materi dan kuis akan menyesuaikan jurusan yang kamu pilih.'}</p>
+            <h2>${first ? 'Pilih jurusanmu' : 'Ganti jurusan'}</h2>
+            <p>Materi dan kuis bakal menyesuaikan jurusan yang kamu pilih.</p>
             ${first ? `<div class="input-group" style="margin-top:14px;text-align:left;">
-                <label>Namamu (boleh nama panggilan)</label>
+                <label>Nama panggilan</label>
                 <input id="onb-name" class="input-field" maxlength="30" placeholder="Contoh: Rani" value="${state.studentName !== 'Siswa Pintar' ? escapeHtml(state.studentName) : ''}">
             </div>` : ''}
             <div class="track-cards">
                 <div class="track-card ipa ${state.track === 'ipa' ? 'selected' : ''}" onclick="App.chooseTrack('ipa')">
-                    <span class="tc-icon">🔬</span><div class="tc-title">IPA</div>
+                    <div class="tc-title">IPA</div>
                     <div class="tc-desc">Fisika · Kimia · Biologi · Matematika</div>
                 </div>
                 <div class="track-card ips ${state.track === 'ips' ? 'selected' : ''}" onclick="App.chooseTrack('ips')">
-                    <span class="tc-icon">🌏</span><div class="tc-title">IPS</div>
+                    <div class="tc-title">IPS</div>
                     <div class="tc-desc">Ekonomi · Sosiologi · Geografi · Sejarah · Matematika</div>
                 </div>
             </div>
-            <p style="font-size:12px;color:var(--text-muted);">Bisa diganti kapan saja lewat tombol 🎓 di atas.</p>`);
+            <p style="font-size:12px;color:var(--text-muted);">Bisa diganti kapan aja lewat tombol jurusan di atas.</p>`);
         if (first) document.getElementById('modal-overlay').onclick = null; // wajib memilih saat pertama kali
     }
 
@@ -402,7 +397,7 @@ const App = (() => {
         const changed = state.track !== t;
         setState(updates);
         closeModal();
-        showToast(changed ? '🎓 Jurusan ' + trackLabel() + ' dipilih! Materi & kuis disesuaikan.' : 'Jurusan tetap ' + trackLabel());
+        showToast(changed ? 'Jurusan ' + trackLabel() + ' dipilih' : 'Jurusan tetap ' + trackLabel());
         navigate('beranda');
     }
 
@@ -411,7 +406,9 @@ const App = (() => {
         loadState();
         initTheme();
         initRouter();
-        if (!state.track) showOnboarding();
+        const needAccount = typeof Akun !== 'undefined' && !Akun.has() && !Akun.skipped();
+        if (needAccount) Akun.open();
+        else if (!state.track) showOnboarding();
         updateStreakBadge();
         renderBeranda();
     }

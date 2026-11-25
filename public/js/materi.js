@@ -388,12 +388,12 @@ const Materi = (() => {
         page.innerHTML = `
             <!-- Switcher Modul Interaktif & Rangkuman Kilat -->
             <div class="materi-mode-tabs">
-                <button class="materi-mode-tab active" onclick="Materi.renderList()">📖 Modul Interaktif</button>
-                <button class="materi-mode-tab" onclick="App.navigate('rangkuman')">⚡ Rangkuman & Cheat Sheet</button>
+                <button class="materi-mode-tab active" onclick="Materi.renderList()">Modul interaktif</button>
+                <button class="materi-mode-tab" onclick="App.navigate('rangkuman')">Rangkuman</button>
             </div>
 
-            <h2 class="section-title" style="margin-top:0;">📖 Modul Pembelajaran SMA — ${track}</h2>
-            <p class="section-subtitle">Materi interaktif lengkap dengan simulasi slider, grafik dinamis & visualisasi organ.</p>
+            <h2 class="section-title" style="margin-top:0;">Materi ${track}</h2>
+            <p class="section-subtitle">Tiap bab ada simulasinya. Geser, ubah angkanya, lihat apa yang berubah.</p>
 
             <!-- Menu Filter Tab Mata Pelajaran -->
             <div class="subject-filter-nav">
